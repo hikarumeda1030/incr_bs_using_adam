@@ -8,7 +8,7 @@ import os
 import json
 from training import train, test
 from utils import checkpoint, get_lr_scheduler, get_bs_scheduler, get_config_value, save_to_csv
-from optim.sgd import SGD
+from utils.setup_optimizer import setup_optimizer
 
 
 # Command Line Argument
@@ -26,6 +26,7 @@ if __name__ == '__main__':
         config = json.load(f)
 
     lr = get_config_value(config, "init_lr")
+    optimizer_name = get_config_value(config, "optimizer")
     epochs = get_config_value(config, "epochs")
     checkpoint_path = config.get("checkpoint_path", "checkpoint.pth.tar")
     csv_path = get_config_value(config, "csv_path")
@@ -61,7 +62,7 @@ if __name__ == '__main__':
 
     criterion = nn.CrossEntropyLoss()
 
-    optimizer = SGD(model.parameters(), lr=lr)
+    optimizer = setup_optimizer(optimizer_name, model.parameters(), lr=lr)
     bs_scheduler, total_steps = get_bs_scheduler(config, trainset_length=len(trainset))
     print(f"total_steps: {total_steps}")
     lr_scheduler, lr_step_type = get_lr_scheduler(optimizer, config, total_steps)
